@@ -7,6 +7,7 @@
 //
 
 #import "TableViewController.h"
+#import "ViewController.h"
 
 #import <FMDB.h>
 #import <sqlite3.h>
@@ -43,17 +44,37 @@
 //     self.clearsSelectionOnViewWillAppear = NO;
     
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-     self.navigationItem.rightBarButtonItem = self.editButtonItem;
+//    self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    
+    UIBarButtonItem *addButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addBtnClick:)];//:@"+" style:UIBarButtonItemStylePlain target:self action:@selector(addBtnClick:)];
+    self.navigationItem.rightBarButtonItems = @[self.editButtonItem, addButtonItem];
 //    _arr = [[NSMutableArray alloc] initWithArray:@[@1, @2, @3, @4, @5, @6, @7, @8]];
     
     [self createDBTable];
     
-    [self insertDB:@"张三" age:20];
+//    [self insertDB:@"张三" age:20];
 //    [self insertDB:@"李四" age:21];
     
 //    [self queryDB:@"SELECT * FROM t_student;" value:nil];
     _arr = [[self queryDB:@"SELECT * FROM t_student WHERE age>=?" value:@[@1]] mutableCopy];
     [self.tableView reloadData];
+}
+
+-(void)addBtnClick:(UIBarButtonItem *)barItem
+{
+    NSUInteger age = arc4random() % 99 + 1;
+    NSArray *randomList = @[@"A", @"B", @"C", @"D", @"E", @"F", @"G", @"H", @"I", @"J", @"K", @"L", @"M", @"N", @"O", @"P", @"Q", @"R", @"S", @"T", @"U", @"V", @"W", @"X", @"Y", @"Z"];
+    NSMutableString *stirng = [[NSMutableString alloc] init];
+    for (int i = 0; i < 4; i++) {
+        [stirng appendString:randomList[arc4random()%randomList.count]];
+    }
+    
+    [self insertDB:stirng age:age];
+    _arr = [[self queryDB:@"select * from t_student" value:nil] mutableCopy];
+    [self.tableView reloadData];
+    
+//    ViewController *vc = [[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"ViewController"];
+//    [self.navigationController pushViewController:vc animated:YES];
 }
 
 -(void)createDBTable
@@ -65,12 +86,12 @@
     FMDatabase *db = [FMDatabase databaseWithPath:_filePath];
     if ([db open]) {
         
-        BOOL result = [db executeUpdate:@"DROP TABLE IF EXISTS t_student"];
-        if (result) {
-            NSLog(@"删除表成功");
-        }
+//        BOOL result = [db executeUpdate:@"DROP TABLE IF EXISTS t_student"];
+//        if (result) {
+//            NSLog(@"删除表成功");
+//        }
         
-        result = [db executeUpdate:@"CREATE TABLE IF NOT EXISTS t_student(id integer PRIMARY KEY, name text NOT NULL, age integer NOT NULL)"];
+        BOOL result = [db executeUpdate:@"CREATE TABLE IF NOT EXISTS t_student(id integer PRIMARY KEY AUTOINCREMENT, name text NOT NULL, age integer NOT NULL)"];
         if (!result) {
             NSLog(@"建表失败!!");
         }
@@ -86,9 +107,9 @@
         NSError *error = nil;
 //        BOOL result;// = [db executeUpdate:@"INSERT INTO t_student (name, age) VALUES (?, ?);", name, @(age)];
         result &= [db executeUpdate:@"INSERT INTO t_student (name, age) VALUES (?, ?);" values:@[name, @(age)] error:&error];
-        result &= [db executeUpdate:@"INSERT INTO t_student (name, age) VALUES (?, ?);" values:@[name, @(24)] error:&error];
-        result &= [db executeUpdate:@"INSERT INTO t_student (name, age) VALUES (?, ?);" values:@[name, @(11)] error:&error];
-        result &= [db executeUpdate:@"INSERT INTO t_student (name, age) VALUES (?, ?);" values:@[name, @(30)] error:&error];
+//        result &= [db executeUpdate:@"INSERT INTO t_student (name, age) VALUES (?, ?);" values:@[name, @(24)] error:&error];
+//        result &= [db executeUpdate:@"INSERT INTO t_student (name, age) VALUES (?, ?);" values:@[name, @(11)] error:&error];
+//        result &= [db executeUpdate:@"INSERT INTO t_student (name, age) VALUES (?, ?);" values:@[name, @(30)] error:&error];
         if (!result && error) {
             NSLog(@"数据插入失败 %@", error);
             *rollback = YES;
@@ -164,9 +185,11 @@
     if (!cell) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"reuseIdentifier"];
     }
+    Student *student = _arr[indexPath.row];
     // Configure the cell...
-    cell.textLabel.text = [NSString stringWithFormat:@"%ld", indexPath.row];
-
+    cell.textLabel.text = [NSString stringWithFormat:@"%ld %@ %ld", student.index, student.name, student.age];
+//    cell.de.text = student.name;
+//    cell.
     
     return cell;
 }
